@@ -7,7 +7,7 @@ import main from "./main";
 registerPlugin({
 	name: "RideVehicleEditor",
 	version: Environment.pluginVersion,
-	authors: ["Basssiiie"],
+	authors: ["Basssiiie", "reticulatingsplines"],
 	type: "local",
 	licence: "MIT",
 	main,

@@ -22,6 +22,7 @@ export interface VehicleSettings
 	mass: number;
 	poweredAcceleration?: number;
 	poweredMaxSpeed?: number;
+	soundRange: number;
 }
 
 
@@ -40,6 +41,7 @@ export default class VehicleEditor
 	readonly isPowered = new Observable<boolean>();
 	readonly poweredAcceleration = new Observable<number>();
 	readonly poweredMaxSpeed = new Observable<number>();
+	readonly soundRange = new Observable<number>();
 
 
 	/**
@@ -203,6 +205,27 @@ export default class VehicleEditor
 		}
 	}
 
+	/**
+	 * Sets the sound_range variable for this vehicle.
+	 * @param soundRange this is a value assigned to vehicles to determine what sounds they play when traveling (e.g. screams)
+	 */
+	setSoundrange(soundRange: number): void
+	{   const currentCar = this.getSelectedCar();
+		if (currentCar)
+		{
+			const vehicleObject = this.getVehicleObject(this.variant);
+			if (vehicleObject.soundRange == 6)
+			{
+				vehicleObject.soundRange = 255;
+				this.soundRange.set(vehicleObject.soundRange);
+			}
+			else
+			{
+			vehicleObject.soundRange = soundRange;
+			this.soundRange.set(soundRange);
+			}
+		}
+	}
 
 	/**
 	 * Scroll the main viewport to the currently selected vehicle.
@@ -234,6 +257,7 @@ export default class VehicleEditor
 			variant: this.variant.get(),
 			seats: this.seats.get(),
 			mass:  this.mass.get(),
+			soundRange: this.soundRange.get(),
 		};
 
 		if (vehicle.isPowered())
@@ -324,16 +348,20 @@ export default class VehicleEditor
 	 * Internal function that applies all vehicle settings to the specified car.
 	 */
 	private applySettingsToCar(car: Car, settings: VehicleSettings, updateObservables: boolean): void
+
 	{
+		const vehicleObj = this.getVehicleObject(settings.variant);
 		car.vehicleObject = settings.variant;
 		car.numSeats = settings.seats;
 		car.mass = settings.mass;
+		vehicleObj.soundRange = settings.soundRange;
 
 		if (updateObservables)
 		{
 			this.variant.set(settings.variant);
 			this.seats.set(settings.seats);
 			this.mass.set(settings.mass);
+			this.soundRange.set(settings.soundRange);
 		}
 
 		const rideTypes = this.rideTypeList.get();
@@ -399,6 +427,7 @@ export default class VehicleEditor
 			this.trackProgress.set(car.trackProgress);
 			this.seats.set(car.numSeats);
 			this.mass.set(car.mass);
+			this.soundRange.set(this.getVehicleObject(car.vehicleObject).soundRange);
 
 			const definition = RideVehicle.getDefinition(car);
 			const isPowered = RideVehicle.isPowered(definition);
@@ -433,17 +462,20 @@ export default class VehicleEditor
 		const vehicleObj = this.getVehicleObject(variant);
 
 		const seats = (vehicleObj.numSeats & 0x7F); // VEHICLE_SEAT_NUM_MASK
+		const soundRange = (vehicleObj.soundRange);
 		const powAcceleration = vehicleObj.poweredAcceleration;
 		const powMaxSpeed = vehicleObj.poweredMaxSpeed;
 		const mass = (vehicleObj.carMass + (car.mass - oldMass));
 		car.vehicleObject = variant;
 		car.numSeats = seats;
 		car.mass = mass;
+		vehicleObj.soundRange = soundRange;
 		car.poweredAcceleration = powAcceleration;
 		car.poweredMaxSpeed = powMaxSpeed;
 		this.variant.set(variant);
 		this.seats.set(seats);
 		this.mass.set(mass);
+		this.soundRange.set(soundRange);
 		this.isPowered.set(RideVehicle.isPowered(vehicleObj));
 		this.poweredAcceleration.set(powAcceleration);
 		this.poweredMaxSpeed.set(powMaxSpeed);

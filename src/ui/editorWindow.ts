@@ -17,7 +17,7 @@ import DropdownButtonControl from "./dropdownButton";
 const windowId = "ride-vehicle-editor";
 const windowStart = 18;
 const windowWidth = 375;
-const windowHeight = 248;
+const windowHeight = 285;
 const widgetLineHeight = 14;
 const groupboxMargin = 5;
 const groupboxItemMargin = (groupboxMargin + 5);
@@ -55,6 +55,7 @@ export default class VehicleEditorWindow
 	readonly powAccelerationSpinner: SpinnerControl;
 	readonly powMaxSpeedSpinner: SpinnerControl;
 	readonly massSpinner: SpinnerControl;
+	readonly soundRangeList: DropdownControl;
 
 	readonly locateButton: ButtonControl;
 	readonly pickerButton: ButtonControl;
@@ -284,6 +285,29 @@ export default class VehicleEditorWindow
 		});
 		editor.mass.subscribe(v => this.massSpinner.set(v));
 
+		// soundRange ID of the selected vehicle.
+		this.soundRangeList = new DropdownControl({
+			name: "rve-soundRange-list",
+			tooltip: "Pick from available soundRange IDs.",
+			disabledMessage: "No soundRange IDs available.",
+			items: ["ID 0 - Screams 1 and 8", "ID 1 - Screams 1-7", "ID 2 - Screams 1 and 6", "ID 3 - Whistle", "ID 4 - Bell", "ID 255 - No Sound"],
+			disableSingleItem: false,
+			x: groupboxMargin + viewportSize + 5 + (controlsSize * controlLabelPart),
+			y: (editorStartY + 1 + controlHeight * 5),
+			width: (controlsSize * (1 - controlLabelPart)),
+			height: widgetLineHeight,
+			onSelect: (v): void => editor.setSoundrange(v),
+		});
+		editor.soundRange.subscribe(v =>
+			{
+			if (v == 255)
+			{
+				v = 6;
+			}
+			this.soundRangeList.set(v);
+		}
+			);
+
 		// Powered acceleration of the selected vehicle.
 		this.powAccelerationSpinner = new SpinnerControl({
 			name: "rve-powered-acceleration-spinner",
@@ -293,7 +317,7 @@ export default class VehicleEditorWindow
 			minimum: 0,
 			maximum: 256,
 			x: (groupboxMargin + viewportSize + 5) + (controlsSize * controlLabelPart),
-			y: (editorStartY + 1 + controlHeight * 5),
+			y: (editorStartY + 1 + controlHeight * 6),
 			width: (controlsSize * (1 - controlLabelPart)),
 			height: widgetLineHeight,
 			onChange: (v): void => editor.setPoweredAcceleration(v)
@@ -309,7 +333,7 @@ export default class VehicleEditorWindow
 			minimum: 0,
 			maximum: 256,
 			x: (groupboxMargin + viewportSize + 5) + (controlsSize * controlLabelPart),
-			y: (editorStartY + 1 + controlHeight * 6),
+			y: (editorStartY + 1 + controlHeight * 7),
 			width: (controlsSize * (1 - controlLabelPart)),
 			height: widgetLineHeight,
 			onChange: (v): void => editor.setPoweredMaximumSpeed(v)
@@ -390,7 +414,7 @@ export default class VehicleEditorWindow
 				{ text: "Apply this to all trains", onClick: (): void => this.applyToAllTrains() }
 			],
 			x: (groupboxMargin + viewportSize + 5),
-			y: (editorStartY + controlHeight * 7) + 2,
+			y: (editorStartY + controlHeight * 8) + 2,
 			width: 211,
 			height: (widgetLineHeight + 1),
 		});
@@ -401,7 +425,7 @@ export default class VehicleEditorWindow
 			tooltip: "Multiplies all spinner controls by the specified amount",
 			items: ["x1", "x10", "x100"],
 			x: (windowWidth - (groupboxMargin + 45)),
-			y: (editorStartY + controlHeight * 7) + 2,
+			y: (editorStartY + controlHeight * 8) + 2,
 			width: 45,
 			height: widgetLineHeight,
 			onSelect: (i): void => this.updateMultiplier(i)
@@ -503,12 +527,24 @@ export default class VehicleEditorWindow
 				},
 				this.massSpinner.createWidget(),
 
+				// soundRange
+				<LabelWidget>{
+					tooltip: this.soundRangeList.params.tooltip,
+					type: "label",
+					x: (groupboxMargin + viewportSize + 5),
+					y: (editorStartY + controlHeight * 5) + 2,
+					width: (controlsSize * controlLabelPart),
+					height: widgetLineHeight,
+					text: "soundRange:"
+				},
+				this.soundRangeList.createWidget(),
+
 				// Powered acceleration
 				<LabelWidget>{
 					tooltip: this.powAccelerationSpinner.params.tooltip,
 					type: "label",
 					x: (groupboxMargin + viewportSize + 5),
-					y: (editorStartY + controlHeight * 5) + 2,
+					y: (editorStartY + controlHeight * 6) + 2,
 					width: (controlsSize * controlLabelPart),
 					height: widgetLineHeight,
 					text: "Acceleration:"
@@ -520,7 +556,7 @@ export default class VehicleEditorWindow
 					tooltip: this.powMaxSpeedSpinner.params.tooltip,
 					type: "label",
 					x: (groupboxMargin + viewportSize + 5),
-					y: (editorStartY + controlHeight * 6) + 2,
+					y: (editorStartY + controlHeight * 7) + 2,
 					width: (controlsSize * controlLabelPart),
 					height: widgetLineHeight,
 					text: "Max. speed:"
@@ -649,6 +685,7 @@ export default class VehicleEditorWindow
 			this.trackProgressSpinner.active(toggle);
 			this.seatCountSpinner.active(toggle);
 			this.massSpinner.active(toggle);
+			this.soundRangeList.active(toggle);
 
 			// Buttons
 			this.applyToOthersButton.active(toggle);
